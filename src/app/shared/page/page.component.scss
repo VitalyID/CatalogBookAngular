@@ -1,0 +1,11 @@
+.book {
+  padding: 40px;
+  background-color: rgb(202, 218, 219);
+  border-radius: 5px;
+  min-height: 100vh; // overflow: hidden;
+
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  flex-direction: column;
+}

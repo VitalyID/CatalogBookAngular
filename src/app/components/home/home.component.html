@@ -1,0 +1,52 @@
+<div class="catalog">
+  <div class="catalog__left">
+    <form [formGroup]="bookForm">
+      <mat-form-field>
+        <input matInput formControlName="author" placeholder="Автор книги" />
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput formControlName="title" placeholder="Название книги" />
+      </mat-form-field>
+      <mat-form-field>
+        <input
+          matInput
+          formControlName="description"
+          placeholder="Описание книги"
+        />
+      </mat-form-field>
+    </form>
+
+    <div class="btn">
+      <button matButton class="custom-button" (click)="addBook()">
+        Добавить книгу
+      </button>
+    </div>
+
+    <mat-form-field>
+      <input
+        matInput
+        placeholder="Поиск"
+        type="search"
+        [formControl]="searchForm"
+        (keyup.enter)="find()"
+      />
+      <button mat-icon-button matSuffix (click)="find()">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="catalog__right">
+    <div class="catalog__contents">
+      <h1>Оглавление книги</h1>
+
+      <ol>
+        @for(li of books(); track li.id) {
+        <li (click)="setBook(li.id)">
+          <h2>{{ li.title }}</h2>
+        </li>
+        }
+      </ol>
+    </div>
+  </div>
+</div>

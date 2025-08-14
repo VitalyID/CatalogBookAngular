@@ -1,0 +1,43 @@
+@mixin flex($fd: row, $jc: center, $align: center, $gap: 0) {
+  display: flex;
+  flex-direction: $fd;
+  justify-content: $jc;
+  align-items: $align;
+  gap: $gap;
+}
+
+.catalog {
+  padding: 40px;
+  background-color: rgb(202, 218, 219);
+  border-radius: 5px;
+  min-height: 100vh;
+  @include flex();
+
+  &__left {
+    width: 50%;
+    overflow: hidden;
+  }
+
+  & mat-form-field {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  & .mat-mdc-input-element.catalog__textarea {
+    width: 90%;
+    height: 10vh;
+    resize: none;
+  }
+
+  &__right {
+    width: 50%;
+  }
+
+  & li {
+    cursor: pointer;
+  }
+
+  & .btn {
+    margin-bottom: 20px;
+  }
+}
