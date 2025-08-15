@@ -28,9 +28,9 @@
         placeholder="Поиск"
         type="search"
         [formControl]="searchForm"
-        (keyup.enter)="find()"
+        (keyup.enter)="findBook()"
       />
-      <button mat-icon-button matSuffix (click)="find()">
+      <button mat-icon-button matSuffix (click)="findBook()">
         <mat-icon>search</mat-icon>
       </button>
     </mat-form-field>
@@ -41,8 +41,8 @@
       <h1>Оглавление книги</h1>
 
       <ol>
-        @for(li of books(); track li.id) {
-        <li (click)="setBook(li.id)">
+        @for(li of books(); track li.title) {
+        <li (click)="setBook(li.title)">
           <h2>{{ li.title }}</h2>
         </li>
         }

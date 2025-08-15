@@ -7,24 +7,41 @@ import { Book } from '../types/interfaces/book';
   providedIn: 'root',
 })
 export class BookService {
-  URL = 'assets/mock/books.json';
-
   readonly #http = inject(HttpClient);
 
+  URL = 'http://localhost:3000/books';
+
   // NOTE: something about store....
-  store = new BehaviorSubject<Book[]>([
-    { id: '', title: '', author: '', description: '' },
-  ]);
+  books = new BehaviorSubject<Book[]>([]);
 
   getBook() {
     return this.#http.get<Book[]>(this.URL).pipe(
-      tap((list) => {
-        this.store.next(list);
+      tap((list: Book[]) => {
+        this.books.next(list);
       }),
       catchError((error) => {
         console.log('Error get books');
-        return throwError(() => Error);
+        return throwError(() => error);
       })
     );
+  }
+
+  postBook(book: Book) {
+    return this.#http.post<Book>(this.URL, book).pipe(
+      catchError((error) => {
+        console.log('Error post books');
+        return throwError(() => error);
+      }),
+      tap((newBook) => {
+        const currentListBook = this.books.getValue();
+        this.books.next([...currentListBook, newBook]);
+      })
+    );
+  }
+
+  findBook(search: string) {
+    return this.books
+      .getValue()
+      .find((book) => book.author === search || book.title === search);
   }
 }

@@ -1,10 +1,9 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../services/book-service';
 import { Book } from '../../types/interfaces/book';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-page',
@@ -13,28 +12,25 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   styleUrl: './page.component.scss',
 })
 export class PageComponent implements OnInit {
-  book = signal<Book>({ id: '', title: '', author: '', description: '' });
-  idBook: string | null = '';
+  book = signal<Book>({ title: '', author: '', description: '' });
 
   readonly #store = inject(BookService);
-  readonly #destroyRef = inject(DestroyRef);
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
 
   ngOnInit(): void {
-    this.idBook = this.#route.snapshot.paramMap.get('id');
+    const idBook = this.#route.snapshot.paramMap.get('title');
 
-    this.#store.store
-      .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe((list) => {
-        const result = list.find((info) => info.id === this.idBook);
-        if (result) {
-          this.book.set(result);
-        }
-      });
+    if (!idBook) {
+      return;
+    }
+
+    const foundBook = this.#store.findBook(idBook);
+
+    foundBook ? this.book.set(foundBook) : this.#router.navigate(['']);
   }
 
-  back() {
+  back(): void {
     this.#router.navigate(['']);
   }
 }

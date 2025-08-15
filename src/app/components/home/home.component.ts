@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
+import { tap } from 'rxjs';
 import * as uuid from 'uuid';
 import { BookService } from '../../services/book-service';
 import { Book } from '../../types/interfaces/book';
@@ -24,18 +25,16 @@ import { Book } from '../../types/interfaces/book';
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
+  readonly #http = inject(BookService);
+  readonly #fb = inject(FormBuilder);
+  readonly #route = inject(Router);
+  readonly #destroyRef = inject(DestroyRef);
+
   books = signal<Book[]>([]);
   author: string = '';
   title: string = '';
   description: string = '';
   search: string = '';
-
-  readonly #http = inject(BookService);
-  readonly #fb = inject(FormBuilder);
-  readonly #route = inject(Router);
-  readonly #DestroyRef = inject(DestroyRef);
-
-  // books: Observable<Book[]> = this.#http.getBook();
 
   bookForm = this.#fb.group({
     author: [],
@@ -48,35 +47,22 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.#http
       .getBook()
-      .pipe(takeUntilDestroyed(this.#DestroyRef))
+      .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe((list) => {
         this.books.set(list);
       });
 
+    this.subscribeForm('author');
+    this.subscribeForm('title');
+    this.subscribeForm('description');
+  }
+  subscribeForm(controlName: 'author' | 'title' | 'description') {
     this.bookForm
-      .get('author')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.#DestroyRef))
-      .subscribe((author) => {
-        if (author) {
-          this.author = author;
-        }
-      });
-
-    this.bookForm
-      .get('title')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.#DestroyRef))
-      .subscribe((title) => {
-        if (title) {
-          this.author = title;
-        }
-      });
-
-    this.bookForm
-      .get('description')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.#DestroyRef))
-      .subscribe((description) => {
-        if (description) {
-          this.author = description;
+      .get(controlName)
+      ?.valueChanges.pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((value: string | null) => {
+        if (value !== null) {
+          (this as any)[controlName] = value;
         }
       });
   }
@@ -95,22 +81,35 @@ export class HomeComponent implements OnInit {
       description: this.description,
     };
 
-    this.books.update((oldValue) => [...oldValue, newBook]);
+    this.postBook(newBook);
   }
 
-  find() {
-    const searchValue = this.searchForm.value;
+  findBook() {
+    const searchBook = this.searchForm.value;
+    if (!searchBook) return;
 
-    const findBook = this.books().find(
-      (book) => book.author === searchValue || book.title === searchValue
-    );
-
-    if (findBook?.id) {
-      this.navigate(findBook.id);
+    const foundBook = this.#http.findBook(searchBook);
+    if (foundBook?.title) {
+      this.navigate(foundBook.title);
     }
   }
 
-  navigate(id: string) {
-    this.#route.navigate(['/about', id]);
+  navigate(title: string) {
+    this.#route.navigate(['/about', title]);
+  }
+
+  postBook(book: Book) {
+    console.log('postBook', book);
+    this.#http
+      .postBook(book)
+      .pipe(
+        tap(() => {
+          this.bookForm.reset;
+          this.author = '';
+          this.title = '';
+          this.description = '';
+        })
+      )
+      .subscribe();
   }
 }
