@@ -5,7 +5,8 @@ For Linux:
 
 After it.
 First terminal:
-npm install json-server
+1. npm install json-server
+2. npx json-server src/assets/books.json
 
 Second terminal:
 ng serve -o
