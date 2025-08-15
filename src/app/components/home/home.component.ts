@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import * as uuid from 'uuid';
 import { BookService } from '../../services/book-service';
 import { Book } from '../../types/interfaces/book';
 
@@ -74,8 +73,7 @@ export class HomeComponent implements OnInit {
   addBook() {
     if (!this.title && !this.author && !this.description) return;
 
-    const newBook = {
-      id: uuid.v4(),
+    const newBook: Book = {
       author: this.author,
       title: this.title,
       description: this.description,
