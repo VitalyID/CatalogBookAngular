@@ -32,16 +32,24 @@ export class BookService {
         console.log('Error post books');
         return throwError(() => error);
       }),
-      tap((newBook) => {
+      tap((newBook: Book) => {
         const currentListBook = this.books.getValue();
         this.books.next([...currentListBook, newBook]);
       })
     );
   }
 
-  findBook(search: string) {
-    return this.books
+  findBook(search: string): Book[] | undefined {
+    const foundBooks = this.books
       .getValue()
-      .find((book) => book.author === search || book.title === search);
+      .filter((book) => book.author === search || book.title === search);
+
+    if (foundBooks.length === 0) {
+      this.books.next([]);
+      return;
+    }
+
+    this.books.next(foundBooks);
+    return foundBooks;
   }
 }

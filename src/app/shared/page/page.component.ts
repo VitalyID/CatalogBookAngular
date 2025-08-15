@@ -25,9 +25,10 @@ export class PageComponent implements OnInit {
       return;
     }
 
-    const foundBook = this.#store.findBook(idBook);
+    this.#store.findBook(idBook);
 
-    foundBook ? this.book.set(foundBook) : this.#router.navigate(['']);
+    const userBook = this.#store.books.getValue()[0];
+    this.book.set(userBook);
   }
 
   back(): void {

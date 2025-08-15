@@ -41,9 +41,9 @@
       <h1>Оглавление книги</h1>
 
       <ol>
-        @for(li of books(); track li.title) {
-        <li (click)="setBook(li.title)">
-          <h2>{{ li.title }}</h2>
+        @for(book of books(); track book.title) {
+        <li (click)="setBook(book.title)">
+          <h2>{{ book.title }}</h2>
         </li>
         }
       </ol>

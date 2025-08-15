@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { filter, tap } from 'rxjs';
 import { BookService } from '../../services/book-service';
 import { Book } from '../../types/interfaces/book';
 
@@ -44,12 +44,11 @@ export class HomeComponent implements OnInit {
   searchForm = new FormControl('');
 
   ngOnInit(): void {
-    this.#http
-      .getBook()
-      .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe((list) => {
-        this.books.set(list);
-      });
+    this.#http.getBook().subscribe();
+
+    this.#http.books.subscribe((list) => {
+      this.books.set(list);
+    });
 
     this.subscribeForm('author');
     this.subscribeForm('title');
@@ -58,16 +57,18 @@ export class HomeComponent implements OnInit {
   subscribeForm(controlName: 'author' | 'title' | 'description') {
     this.bookForm
       .get(controlName)
-      ?.valueChanges.pipe(takeUntilDestroyed(this.#destroyRef))
+      ?.valueChanges.pipe(
+        filter((value) => value !== null),
+        takeUntilDestroyed(this.#destroyRef)
+      )
       .subscribe((value: string | null) => {
-        if (value !== null) {
-          (this as any)[controlName] = value;
-        }
+        (this as any)[controlName] = value;
       });
   }
 
-  setBook(id: string): void {
-    this.#route.navigate(['/about', id]);
+  setBook(title: string): void {
+    console.log(title);
+    this.#route.navigate(['/about', title]);
   }
 
   addBook() {
@@ -86,10 +87,7 @@ export class HomeComponent implements OnInit {
     const searchBook = this.searchForm.value;
     if (!searchBook) return;
 
-    const foundBook = this.#http.findBook(searchBook);
-    if (foundBook?.title) {
-      this.navigate(foundBook.title);
-    }
+    this.#http.findBook(searchBook);
   }
 
   navigate(title: string) {
